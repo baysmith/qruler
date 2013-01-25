@@ -20,9 +20,9 @@
 
 AboutDialog::AboutDialog(QWidget *parent) : QDialog(parent)
 {
-    labelCopyright = new QLabel(tr("<h3 align='center'>QRule v0.1.</h3>"
+    labelCopyright = new QLabel(tr("<h3 align='center'>QRule v0.5</h3>"
             "<p>Copyright &copy; 2009 Gancov Konstantin</p>"
-            "<p align='left'>e-mail: kossne@mail.ru <br>ICQ: 365978665</p>"
+            "<p align='left'>e-mail: k.gantsov@gmail.ru <br>ICQ: 365978665</p>"
             ), this);
     labelCopyright->setWordWrap(true);
 
