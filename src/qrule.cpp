@@ -64,6 +64,18 @@ QRule::QRule(QRect const & sg, QWidget *parent)
     setWindowOpacity(0.8);
     #endif
 
+    #ifdef Q_WS_MACX
+    Qt::WindowFlags wf = windowFlags();
+    wf |= Qt::WindowStaysOnTopHint;
+    wf |= Qt::X11BypassWindowManagerHint;
+    wf |= Qt::FramelessWindowHint;
+    setWindowFlags(wf);
+
+    windowOnTopAct->setChecked(true);
+    resize(sg.width() + 50, 76);
+    setWindowOpacity(0.8);
+    #endif
+
     QPixmap pxVert(":/images/pointer4.png");
     setCursor(QCursor(pxVert));
     setMouseTracking(true);
@@ -71,10 +83,10 @@ QRule::QRule(QRect const & sg, QWidget *parent)
     colorGradTop = QColor("#517da2"); //be7d32
     colorGradBottom = QColor("#b7cde0"); //#feb969
 
-    fontNormal = QFont("Arial", 7, QFont::Normal);
-    fontBold = QFont("Arial", 7, QFont::Bold);
+    fontNormal = QFont("Arial", 9, QFont::Normal);
+    fontBold = QFont("Arial", 9, QFont::Bold);
     defaultPen = QPen(Qt::black, 1, Qt::SolidLine);
-    fontColorName = QFont("Arial", 8, QFont::Normal);
+    fontColorName = QFont("Arial", 9, QFont::Normal);
 }
 
 QRule::~QRule()
