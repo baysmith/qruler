@@ -207,8 +207,8 @@ void QRule::paintEvent(QPaintEvent *)
         if (pointer >= 0) {
             painter.setPen(defaultPen);
             painter.setBrush(QBrush(Qt::white, Qt::SolidPattern));
-            painter.drawRect(pointer, 13, fm.width(QChar()) * 4, fm.height() + 1);
-            painter.drawText(pointer, 13, fm.width(QChar()) * 4, fm.height() + 1, Qt::AlignCenter, pointer1);
+            painter.drawRect(pointer, 13, fm.width(QChar('0')) * 6, fm.height() + 7);
+            painter.drawText(pointer, 13, fm.width(QChar('0')) * 6, fm.height() + 7, Qt::AlignCenter, pointer1);
         }
 
     } else {
@@ -278,8 +278,8 @@ void QRule::paintEvent(QPaintEvent *)
 
             painter.setPen(defaultPen);
             painter.setBrush(QBrush(Qt::white, Qt::SolidPattern));
-            painter.drawRect(40, pointer + 5, fm.width(QChar()) * 4, fm.height() + 1);
-            painter.drawText(40, pointer + 5, fm.width(QChar()) * 4, fm.height() + 1, Qt::AlignCenter, pointer1);
+            painter.drawRect(40, pointer + 5, fm.width(QChar('0')) * 6, fm.height() + 7);
+            painter.drawText(40, pointer + 5, fm.width(QChar('0')) * 6, fm.height() + 7, Qt::AlignCenter, pointer1);
         }
     }
 }
