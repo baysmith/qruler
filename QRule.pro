@@ -7,7 +7,6 @@
 TARGET = QRule
 TEMPLATE = app
 
-
 SOURCES += src/main.cpp\
         src/qrule.cpp\
         src/aboutdialog.cpp
@@ -16,6 +15,7 @@ HEADERS  += src/qrule.h\
             src/aboutdialog.h
 
 RESOURCES = qrule.qrc
+ICON = qruler.icns
 
 win32 {
     RC_FILE = qrule.rc
