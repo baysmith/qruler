@@ -148,7 +148,7 @@ void QRule::paintEvent(QPaintEvent *)
         gradient.setColorAt(0, colorGradTop);
         gradient.setColorAt(1, colorGradBottom);
         painter.setBrush(gradient);
-        painter.drawRect(0, 0, width() - 1, height() - 1);
+        painter.drawRect(0, 0, width(), height());
         int lineHeight = 5;
         int cnt = 0;
         int marginLeft = 2;
@@ -218,7 +218,7 @@ void QRule::paintEvent(QPaintEvent *)
         gradient.setColorAt(0, colorGradTop);
         gradient.setColorAt(1, colorGradBottom);
         painter.setBrush(gradient);
-        painter.drawRect(0, 0, width() - 1, height() - 1);
+        painter.drawRect(0, 0, width(), height());
         int lineHeight = 5;
         int cnt = 0;
         int marginLeft = 2;
