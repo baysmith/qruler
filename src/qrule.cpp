@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2009 by Gancov Konstantin                               *
+ *   Copyright (C) 2009 by Gantsov Konstantin                              *
  *   kossne@mail.ru                                                        *
  *                                                                         *
  * QRule is free software: you can redistribute it and/or modify           *
@@ -35,7 +35,7 @@ QRule::QRule(QRect const & sg, QWidget *parent)
     connect(trayIcon, SIGNAL(activated(QSystemTrayIcon::ActivationReason)),
              this, SLOT(iconActivated(QSystemTrayIcon::ActivationReason)));
 
-    #ifdef Q_WS_WIN
+    #ifdef Q_OS_WIN
     Qt::WindowFlags wf;
     wf |= Qt::WindowStaysOnTopHint;
     wf |= Qt::FramelessWindowHint;
@@ -48,23 +48,23 @@ QRule::QRule(QRect const & sg, QWidget *parent)
     }
     setWindowOpacity(0.8);
     move(0, sg.height() / 2);
-    resize(sg.width() + 30, 76);
+    resize(sg.width() + 100, 76);
     #endif
 
 
 
-    #ifdef Q_WS_X11
+    #ifdef Q_OS_X11
     Qt::WindowFlags wf = windowFlags();
     wf |= Qt::WindowStaysOnTopHint;
     wf |= Qt::X11BypassWindowManagerHint;
     setWindowFlags(wf);
 
     windowOnTopAct->setChecked(true);
-    resize(sg.width() + 30, 76);
+    resize(sg.width() + 100, 76);
     setWindowOpacity(0.8);
     #endif
 
-    #ifdef Q_WS_MACX
+    #ifdef Q_OS_MAC
     Qt::WindowFlags wf = windowFlags();
     wf |= Qt::WindowStaysOnTopHint;
     wf |= Qt::X11BypassWindowManagerHint;
@@ -72,7 +72,7 @@ QRule::QRule(QRect const & sg, QWidget *parent)
     setWindowFlags(wf);
 
     windowOnTopAct->setChecked(true);
-    resize(sg.width() + 50, 76);
+    resize(sg.width() + 100, 76);
     setWindowOpacity(0.8);
     #endif
 
@@ -155,8 +155,10 @@ void QRule::paintEvent(QPaintEvent *)
         int k = 20;
         painter.setFont(fontNormal);
         QString pointer1 = QString::number(pointer);
-        QPixmap pixel = QPixmap::grabWindow(QApplication::desktop()->winId(), grabPoint.x(), grabPoint.y() + 21, 1, 1);
+        QScreen *screen = QGuiApplication::primaryScreen();
+        QPixmap pixel = screen->grabWindow(0, grabPoint.x(), grabPoint.y() + 21, 1, 1);
         QImage img(pixel.toImage()); 
+
         if (pickedColor != QColor(img.pixel(0,0))) {
             pickedColor = QColor(img.pixel(0,0));
         }
@@ -224,8 +226,10 @@ void QRule::paintEvent(QPaintEvent *)
         painter.setFont(fontNormal);
         QString pointer1 = QString::number(pointer);
 
-        QPixmap pixel = QPixmap::grabWindow(QApplication::desktop()->winId(), grabPoint.x() - 22, grabPoint.y(), 1, 1);
+        QScreen *screen = QGuiApplication::primaryScreen();
+        QPixmap pixel = screen->grabWindow(QApplication::desktop()->winId(), grabPoint.x() - 22, grabPoint.y(), 1, 1);
         QImage img(pixel.toImage());
+
         if (pickedColor != QColor(img.pixel(0,0))) {
             pickedColor = QColor(img.pixel(0,0));
         }
@@ -429,25 +433,6 @@ void QRule::keyPressEvent(QKeyEvent *event)
 
 void QRule::about()
 {
-    /*QMessageBox::about(
-        this,
-        tr("QRule v0.1."),
-        tr("<h3 align='center'>QRule v0.1.</h3> <p>Copyright &copy; "
-           "2009 Gancov Konstantin</p><p align='left'>e-mail: kossne@mail.ru <br>"
-           "ICQ: 365978665</p><h4>GNU General Public Licence</h4>"
-           "QRule is free software; you can redistribute it<br>"
-            "and/or modify it under the terms of the GNU General<br>"
-            "Public License as published by the Free Software<br>"
-            "Foundation; either version 2 of the License, or (at your<br>"
-            "option) any later version.<br><br>"
-            "QRule is distributed in the hope that it will be<br>"
-            "useful, but WITHOUT ANY WARRANTY; without even the <br>"
-            "implied warranty of MERCHANTABILITY or FITNESS FOR<br>"
-            "A PARTICULAR PURPOSE. See the GNU General Public<br>"
-            "License for more details. <br><br>"
-            "You should have received a copy of the GNU General Public License<br>"
-            "along with BinClock. If not, see http://www.gnu.org/licenses/."
-    ));*/
     AboutDialog about(this);
     about.exec();
 }

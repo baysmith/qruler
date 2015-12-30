@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2009 by Gancov Konstantin                               *
+ *   Copyright (C) 2009 by Gantsov Konstantin                              *
  *   kossne@mail.ru                                                        *
  *                                                                         *
  * QRule is free software: you can redistribute it and/or modify        *
@@ -21,7 +21,7 @@
 AboutDialog::AboutDialog(QWidget *parent) : QDialog(parent)
 {
     labelCopyright = new QLabel(tr("<h3 align='center'>QRule v0.5</h3>"
-            "<p>Copyright &copy; 2009 Gancov Konstantin</p>"
+            "<p>Copyright &copy; 2009 Gantsov Konstantin</p>"
             "<p align='left'>e-mail: k.gantsov@gmail.com</p>"
             ), this);
     labelCopyright->setWordWrap(true);

@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2009 by Gancov Konstantin                               *
+ *   Copyright (C) 2009 by Gantsov Konstantin                              *
  *   kossne@mail.ru                                                        *
  *                                                                         *
  * QRule is free software: you can redistribute it and/or modify        *
@@ -20,7 +20,7 @@
 #define QRULE_H
 
 #include <QFrame>
-#include <QtGui>
+#include <QtWidgets>
 #include "aboutdialog.h"
 #include <QSystemTrayIcon>
 

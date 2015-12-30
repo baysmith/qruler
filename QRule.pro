@@ -7,6 +7,8 @@
 TARGET = QRule
 TEMPLATE = app
 
+QT += widgets
+
 SOURCES += src/main.cpp\
         src/qrule.cpp\
         src/aboutdialog.cpp

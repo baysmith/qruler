@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2009 by Gancov Konstantin                               *
+ *   Copyright (C) 2009 by Gantsov Konstantin                              *
  *   kossne@mail.ru                                                        *
  *                                                                         *
  * QRule is free software: you can redistribute it and/or modify        *
@@ -16,7 +16,7 @@
  * along with QRule. If not, see <http://www.gnu.org/licenses/>.        *
  ***************************************************************************/
 
-#include <QtGui/QApplication>
+#include <QtWidgets/QApplication>
 #include "qrule.h"
 
 int main(int argc, char *argv[])

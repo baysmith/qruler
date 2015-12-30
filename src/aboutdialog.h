@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2009 by Gancov Konstantin                               *
+ *   Copyright (C) 2009 by Gantsov Konstantin                              *
  *   kossne@mail.ru                                                        *
  *                                                                         *
  * QRule is free software: you can redistribute it and/or modify        *
@@ -18,15 +18,15 @@
 
 #ifndef ABOUTDIALOG_H
 #define ABOUTDIALOG_H
-#include <QtGui/QGridLayout>
-#include <QtGui/QGroupBox>
-#include <QtGui/QLabel>
-#include <QtGui/QHBoxLayout>
-#include <QtGui/QPushButton>
-#include <QtGui/QDialog>
-#include <QtGui/QStyle>
-#include <QtGui/QApplication>
-#include <QtGui/QStyleFactory>
+#include <QtWidgets/QGridLayout>
+#include <QtWidgets/QGroupBox>
+#include <QtWidgets/QLabel>
+#include <QtWidgets/QHBoxLayout>
+#include <QtWidgets/QPushButton>
+#include <QtWidgets/QDialog>
+#include <QtWidgets/QStyle>
+#include <QtWidgets/QApplication>
+#include <QtWidgets/QStyleFactory>
 
 class AboutDialog : public QDialog
 {
