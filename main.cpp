@@ -27,5 +27,7 @@ int main(int argc, char *argv[])
     QObject::connect(&w, QRuler::menu_quit, &a, QApplication::quit);
     w.show();
     w.activateWindow();
+    if (a.arguments().contains("--hide"))
+        w.showHideRule();
     return a.exec();
 }
