@@ -1,25 +1,35 @@
 /***************************************************************************
+ *   Copyright (C) 2017 by Bradley Smith                                   *
  *   Copyright (C) 2009 by Gantsov Konstantin                              *
- *   kossne@mail.ru                                                        *
  *                                                                         *
- * QRule is free software: you can redistribute it and/or modify           *
+ * QRuler is free software: you can redistribute it and/or modify          *
  * it under the terms of the GNU General Public License as published by    *
  * the Free Software Foundation, either version 3 of the License, or       *
  * (at your option) any later version.                                     *
  *                                                                         *
- * QRule is distributed in the hope that it will be useful,                *
+ * QRuler is distributed in the hope that it will be useful,               *
  * but WITHOUT ANY WARRANTY; without even the implied warranty of          *
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the            *
  * GNU General Public License for more details.                            *
  *                                                                         *
  * You should have received a copy of the GNU General Public License       *
- * along with QRule. If not, see <http://www.gnu.org/licenses/>.           *
+ * along with QRuler. If not, see <http://www.gnu.org/licenses/>.          *
  ***************************************************************************/
 
-#include "qrule.h"
+#include "qruler.h"
 
-QRule::QRule(QRect const & sg, QWidget *parent)
-    : QWidget(0)
+#include "aboutdialog.h"
+#include <QtGui/QClipboard>
+#include <QtGui/QGuiApplication>
+#include <QtGui/QMouseEvent>
+#include <QtGui/QPainter>
+#include <QtGui/QScreen>
+#include <QtWidgets/QAction>
+#include <QtWidgets/QApplication>
+#include <QtWidgets/QDesktopWidget>
+#include <QtWidgets/QMenu>
+
+QRuler::QRuler(QRect const &sg, QWidget *parent) : QWidget(parent)
 {
     horisontal = true;
     pointer = -1;
@@ -27,21 +37,21 @@ QRule::QRule(QRect const & sg, QWidget *parent)
     trayIcon = new QSystemTrayIcon(this);
     trayIcon->setContextMenu(contexMenu);
 
-    QIcon icon = QIcon(":/images/qrule_64.png");
+    QIcon icon = QIcon(":/images/qruler_64.png");
     trayIcon->setIcon(icon);
     setWindowIcon(icon);
     trayIcon->show();
 
-    connect(trayIcon, SIGNAL(activated(QSystemTrayIcon::ActivationReason)),
-             this, SLOT(iconActivated(QSystemTrayIcon::ActivationReason)));
+    connect(trayIcon, QSystemTrayIcon::activated, this, QRuler::iconActivated);
 
-    #ifdef Q_OS_WIN
+#ifdef Q_OS_WIN
     Qt::WindowFlags wf;
     wf |= Qt::WindowStaysOnTopHint;
     wf |= Qt::FramelessWindowHint;
 
     windowOnTopAct->setChecked(true);
-    if (wf != windowFlags()) {
+    if (wf != windowFlags())
+    {
         setWindowFlags(wf);
         show();
         raise();
@@ -49,11 +59,10 @@ QRule::QRule(QRect const & sg, QWidget *parent)
     setWindowOpacity(0.8);
     move(0, sg.height() / 2);
     resize(sg.width() + 100, 76);
-    #endif
+#endif
 
 
-
-    #ifdef Q_OS_X11
+#ifdef Q_OS_X11
     Qt::WindowFlags wf = windowFlags();
     wf |= Qt::WindowStaysOnTopHint;
     wf |= Qt::X11BypassWindowManagerHint;
@@ -62,9 +71,9 @@ QRule::QRule(QRect const & sg, QWidget *parent)
     windowOnTopAct->setChecked(true);
     resize(sg.width() + 100, 76);
     setWindowOpacity(0.8);
-    #endif
+#endif
 
-    #ifdef Q_OS_MAC
+#ifdef Q_OS_MAC
     Qt::WindowFlags wf = windowFlags();
     wf |= Qt::WindowStaysOnTopHint;
     wf |= Qt::X11BypassWindowManagerHint;
@@ -74,13 +83,13 @@ QRule::QRule(QRect const & sg, QWidget *parent)
     windowOnTopAct->setChecked(true);
     resize(sg.width() + 100, 76);
     setWindowOpacity(0.8);
-    #endif
+#endif
 
     QPixmap pxVert(":/images/pointer4.png");
     setCursor(QCursor(pxVert));
     setMouseTracking(true);
 
-    colorGradTop = QColor("#517da2"); //be7d32
+    colorGradTop = QColor("#517da2"); // be7d32
     colorGradBottom = QColor("#b7cde0"); //#feb969
 
     fontNormal = QFont("Arial", 9, QFont::Normal);
@@ -89,40 +98,32 @@ QRule::QRule(QRect const & sg, QWidget *parent)
     fontColorName = QFont("Arial", 9, QFont::Normal);
 }
 
-QRule::~QRule()
+void QRuler::createActions()
 {
-    //qDebug() << "destruct";
-}
-
-void QRule::createActions()
-{
-    horisontalRuleAct = new QAction(tr("Horisontal"),this);
+    auto horisontalRuleAct = new QAction(tr("Horisontal"), this);
     horisontalRuleAct->setShortcut(tr("H"));
     horisontalRuleAct->setCheckable(true);
     horisontalRuleAct->setChecked(true);
-    connect(horisontalRuleAct, SIGNAL(triggered()), this, SLOT(horisontalRule()));
+    connect(horisontalRuleAct, QAction::triggered, this, QRuler::horisontalRule);
 
     windowOnTopAct = new QAction(tr("Window on top"), this);
     windowOnTopAct->setCheckable(true);
-    connect(windowOnTopAct, SIGNAL(triggered()), this, SLOT(menuOnTop()));
+    connect(windowOnTopAct, QAction::triggered, this, QRuler::menuOnTop);
 
-    pickColorAct = new QAction(tr("Pick color"), this);
+    auto pickColorAct = new QAction(tr("Pick color"), this);
     pickColorAct->setShortcut(tr("Ctrl+C"));
-    connect(pickColorAct, SIGNAL(triggered()), this, SLOT(pickColor()));
+    connect(pickColorAct, QAction::triggered, this, QRuler::pickColor);
 
-    aboutAct = new QAction(tr("About"), this);
+    auto aboutAct = new QAction(tr("About"), this);
     aboutAct->setShortcut(tr("F1"));
-    connect(aboutAct, SIGNAL(triggered()), this, SLOT(about()));
+    connect(aboutAct, QAction::triggered, this, QRuler::about);
 
     hideAct = new QAction(tr("Hide"), this);
-    connect(hideAct, SIGNAL(triggered()), this, SLOT(showHideRule()));
-    QFont font(hideAct->font());
-    font.setBold(true);
-    hideAct->setFont(font);
+    connect(hideAct, QAction::triggered, this, QRuler::showHideRule);
 
-    exitAct = new QAction(tr("Exit"), this);
+    auto exitAct = new QAction(tr("Exit"), this);
     exitAct->setShortcut(tr("Ctrl+Q"));
-    connect(exitAct, SIGNAL(triggered()), this, SIGNAL(menu_quit()));
+    connect(exitAct, QAction::triggered, this, QRuler::menu_quit);
 
     contexMenu = new QMenu(this);
 
@@ -135,7 +136,7 @@ void QRule::createActions()
     contexMenu->addAction(exitAct);
 }
 
-void QRule::paintEvent(QPaintEvent *)
+void QRuler::paintEvent(QPaintEvent *)
 {
     QPainter painter(this);
 
@@ -143,7 +144,8 @@ void QRule::paintEvent(QPaintEvent *)
     QFontMetrics fmColorName(fontColorName);
     painter.setRenderHint(QPainter::Antialiasing, false);
     painter.setPen(defaultPen);
-    if (horisontal == true) {
+    if (horisontal == true)
+    {
         QLinearGradient gradient(0, 0, 0, height());
         gradient.setColorAt(0, colorGradTop);
         gradient.setColorAt(1, colorGradBottom);
@@ -157,36 +159,45 @@ void QRule::paintEvent(QPaintEvent *)
         QString pointer1 = QString::number(pointer);
         QScreen *screen = QGuiApplication::primaryScreen();
         QPixmap pixel = screen->grabWindow(0, grabPoint.x(), grabPoint.y() + 21, 1, 1);
-        QImage img(pixel.toImage()); 
+        QImage img(pixel.toImage());
 
-        if (pickedColor != QColor(img.pixel(0,0))) {
-            pickedColor = QColor(img.pixel(0,0));
+        if (pickedColor != QColor(img.pixel(0, 0)))
+        {
+            pickedColor = QColor(img.pixel(0, 0));
         }
         painter.setFont(fontColorName);
         painter.setBrush(QBrush(pickedColor, Qt::SolidPattern));
         painter.drawRect(10, 10, 30, 20);
-        painter.drawText(50, 15, fmColorName.width(QChar('0')) * 7, fmColorName.height(), Qt::AlignLeft, pickedColor.name());
+        painter.drawText(50, 15, fmColorName.width(QChar('0')) * 7,
+                         fmColorName.height(), Qt::AlignLeft, pickedColor.name());
 
-        for (int i = 0; i < (width() - 30); i+=2) {
+        for (int i = 0; i < (width() - 30); i += 2)
+        {
             lineHeight = 5;
 
             if (i >= 1000)
                 marginLeft = 5;
 
             QString number = QString::number(i);
-            if (cnt == 0) {
+            if (cnt == 0)
+            {
                 painter.setFont(fontBold);
                 lineHeight = 20;
                 painter.drawText(-2, height() - 30, 20, 10, Qt::AlignRight, number);
             }
 
-            if (cnt == 10) {
+            if (cnt == 10)
+            {
                 QString number1 = QString::number(k);
-                if (i % 100 == 0) {
+                if (i % 100 == 0)
+                {
                     painter.setFont(fontBold);
-                    painter.drawText(marginLeft + i, height() - 30, 23, 10, Qt::AlignRight, number);
+                    painter.drawText(marginLeft + i, height() - 30, 23, 10,
+                                     Qt::AlignRight, number);
                     lineHeight = 20;
-                } else {
+                }
+                else
+                {
                     painter.setFont(fontNormal);
                     painter.drawText(0 + i, height() - 25, 20, 10, Qt::AlignRight, number1);
                     lineHeight = 15;
@@ -197,7 +208,8 @@ void QRule::paintEvent(QPaintEvent *)
                 k += 20;
             }
 
-            if (cnt == 5) {
+            if (cnt == 5)
+            {
                 lineHeight = 10;
             }
 
@@ -206,14 +218,17 @@ void QRule::paintEvent(QPaintEvent *)
             ++cnt;
         }
 
-        if (pointer >= 0) {
+        if (pointer >= 0)
+        {
             painter.setPen(defaultPen);
             painter.setBrush(QBrush(Qt::white, Qt::SolidPattern));
             painter.drawRect(pointer, 13, fm.width(QChar('0')) * 6, fm.height() + 7);
-            painter.drawText(pointer, 13, fm.width(QChar('0')) * 6, fm.height() + 7, Qt::AlignCenter, pointer1);
+            painter.drawText(pointer, 13, fm.width(QChar('0')) * 6,
+                             fm.height() + 7, Qt::AlignCenter, pointer1);
         }
-
-    } else {
+    }
+    else
+    {
         QLinearGradient gradient(width(), 0, 0, 0);
         gradient.setColorAt(0, colorGradTop);
         gradient.setColorAt(1, colorGradBottom);
@@ -221,44 +236,49 @@ void QRule::paintEvent(QPaintEvent *)
         painter.drawRect(0, 0, width(), height());
         int lineHeight = 5;
         int cnt = 0;
-        int marginLeft = 2;
         int k = 20;
         painter.setFont(fontNormal);
         QString pointer1 = QString::number(pointer);
 
         QScreen *screen = QGuiApplication::primaryScreen();
-        QPixmap pixel = screen->grabWindow(QApplication::desktop()->winId(), grabPoint.x() - 22, grabPoint.y(), 1, 1);
+        QPixmap pixel = screen->grabWindow(QApplication::desktop()->winId(),
+                                           grabPoint.x() - 22, grabPoint.y(), 1, 1);
         QImage img(pixel.toImage());
 
-        if (pickedColor != QColor(img.pixel(0,0))) {
-            pickedColor = QColor(img.pixel(0,0));
+        if (pickedColor != QColor(img.pixel(0, 0)))
+        {
+            pickedColor = QColor(img.pixel(0, 0));
         }
 
         painter.setFont(fontColorName);
         painter.setBrush(QBrush(pickedColor, Qt::SolidPattern));
         painter.drawRect(44, 10, 20, 30);
-        painter.drawText(33, 50, fmColorName.width(QChar('0')) * 7, fmColorName.height(), Qt::AlignLeft, pickedColor.name());
+        painter.drawText(33, 50, fmColorName.width(QChar('0')) * 7,
+                         fmColorName.height(), Qt::AlignLeft, pickedColor.name());
 
-        for (int i = 0; i < (height() - 30); i+=2) {
+        for (int i = 0; i < (height() - 30); i += 2)
+        {
             lineHeight = 5;
 
-            if (i >= 1000)
-                marginLeft = 5;
-
             QString number = QString::number(i);
-            if (cnt == 0) {
+            if (cnt == 0)
+            {
                 painter.setFont(fontBold);
                 lineHeight = 20;
                 painter.drawText(5, i + 10, 25, 10, Qt::AlignRight, number);
             }
 
-            if (cnt == 10) {
+            if (cnt == 10)
+            {
                 QString number1 = QString::number(k);
-                if (i % 100 == 0) {
+                if (i % 100 == 0)
+                {
                     painter.setFont(fontBold);
                     painter.drawText(15, i + 10, 25, 10, Qt::AlignRight, number);
                     lineHeight = 20;
-                } else {
+                }
+                else
+                {
                     painter.setFont(fontNormal);
                     painter.drawText(5, i + 10, 25, 10, Qt::AlignRight, number1);
                     lineHeight = 15;
@@ -270,7 +290,8 @@ void QRule::paintEvent(QPaintEvent *)
                 k += 20;
             }
 
-            if (cnt == 5) {
+            if (cnt == 5)
+            {
                 lineHeight = 10;
             }
 
@@ -278,17 +299,19 @@ void QRule::paintEvent(QPaintEvent *)
 
             ++cnt;
         }
-        if (pointer >= 0) {
+        if (pointer >= 0)
+        {
 
             painter.setPen(defaultPen);
             painter.setBrush(QBrush(Qt::white, Qt::SolidPattern));
             painter.drawRect(40, pointer + 5, fm.width(QChar('0')) * 6, fm.height() + 7);
-            painter.drawText(40, pointer + 5, fm.width(QChar('0')) * 6, fm.height() + 7, Qt::AlignCenter, pointer1);
+            painter.drawText(40, pointer + 5, fm.width(QChar('0')) * 6,
+                             fm.height() + 7, Qt::AlignCenter, pointer1);
         }
     }
 }
 
-void QRule::mouseMoveEvent(QMouseEvent* e)
+void QRuler::mouseMoveEvent(QMouseEvent *e)
 {
     grabPoint = e->globalPos();
     newPlace = e->pos();
@@ -296,58 +319,67 @@ void QRule::mouseMoveEvent(QMouseEvent* e)
     if (e->buttons() & Qt::LeftButton)
         move(grabPoint - clickPos);
 
-    if (horisontal) {
+    if (horisontal)
+    {
         pointer = newPlace.x() - 15;
-        if ((pointer >= 0) && (pointer <= width() - 31)) {
+        if ((pointer >= 0) && (pointer <= width() - 31))
+        {
             repaint();
         }
-    } else {
+    }
+    else
+    {
         pointer = newPlace.y() - 15;
-        if ((pointer >= 0) && (pointer <= height() - 31)) {
+        if ((pointer >= 0) && (pointer <= height() - 31))
+        {
             repaint();
         }
     }
 }
 
-void QRule::mousePressEvent(QMouseEvent* e)
+void QRuler::mousePressEvent(QMouseEvent *e)
 {
     activateWindow();
     clickPos = e->pos();
     raise();
-    if (e->button() == Qt::RightButton) {
+    if (e->button() == Qt::RightButton)
+    {
         contexMenu->popup(e->globalPos());
     }
 }
 
-void QRule::resizeEvent(QResizeEvent * event)
+void QRuler::showHideRule()
 {
-
-}
-
-void QRule::showHideRule()
-{
-    if (isVisible()) {
+    if (isVisible())
+    {
         hide();
         hideAct->setText(tr("Show"));
-    } else {
+    }
+    else
+    {
         show();
         activateWindow();
         hideAct->setText(tr("Hide"));
     }
 }
 
-void QRule::setOnTop(bool f)
+void QRuler::setOnTop(bool f)
 {
     Qt::WindowFlags wf = windowFlags();
     bool isv = isVisible();
-    if (f) {
+    if (f)
+    {
         wf |= Qt::WindowStaysOnTopHint;
-    } else {
+    }
+    else
+    {
         wf &= ~Qt::WindowStaysOnTopHint;
     }
-    if (wf != windowFlags()) {
+    if (wf != windowFlags())
+    {
         setWindowFlags(wf);
-        if (isv) {
+        if (isv)
+        {
             show();
             raise();
         }
@@ -355,25 +387,26 @@ void QRule::setOnTop(bool f)
 }
 
 
-void QRule::iconActivated(QSystemTrayIcon::ActivationReason reason)
+void QRuler::iconActivated(QSystemTrayIcon::ActivationReason reason)
 {
-    switch (reason) {
+    switch (reason)
+    {
     case QSystemTrayIcon::Trigger:
         showHideRule();
-    break;
+        break;
     case QSystemTrayIcon::DoubleClick:
-    break;
+        break;
     default:
-        ;
+        break;
     }
 }
 
-void QRule::menuOnTop()
+void QRuler::menuOnTop()
 {
     setOnTop(windowOnTopAct->isChecked());
 }
 
-void QRule::pickColor()
+void QRuler::pickColor()
 {
     clipboard = QApplication::clipboard();
     QString str;
@@ -382,7 +415,7 @@ void QRule::pickColor()
     clipboard->setText(str, QClipboard::Clipboard);
 }
 
-void QRule::horisontalRule()
+void QRuler::horisontalRule()
 {
     QPixmap pxVert(":/images/pointer4.png");
     QPixmap pxHor(":/images/pointer4hor.png");
@@ -399,39 +432,46 @@ void QRule::horisontalRule()
         setCursor(QCursor(pxHor));
 }
 
-void QRule::keyPressEvent(QKeyEvent *event)
+void QRuler::keyPressEvent(QKeyEvent *event)
 {
-    switch (event->key()) {
-        case Qt::Key_Q:
-            if (event->modifiers() & Qt::ControlModifier) {
-                menu_quit();
-            } else {
-                QWidget::keyPressEvent(event);
-            }
-        break;
-
-        case Qt::Key_H:
-            horisontalRule();
-        break;
-
-        case Qt::Key_C:
-            if (event->modifiers() & Qt::ControlModifier) {
-                pickColor();
-            } else {
-                QWidget::keyPressEvent(event);
-            }
-        break;
-
-        case Qt::Key_F1:
-            about();
-        break;
-
-        default:
+    switch (event->key())
+    {
+    case Qt::Key_Q:
+        if (event->modifiers() & Qt::ControlModifier)
+        {
+            menu_quit();
+        }
+        else
+        {
             QWidget::keyPressEvent(event);
+        }
+        break;
+
+    case Qt::Key_H:
+        horisontalRule();
+        break;
+
+    case Qt::Key_C:
+        if (event->modifiers() & Qt::ControlModifier)
+        {
+            pickColor();
+        }
+        else
+        {
+            QWidget::keyPressEvent(event);
+        }
+        break;
+
+    case Qt::Key_F1:
+        about();
+        break;
+
+    default:
+        QWidget::keyPressEvent(event);
     }
 }
 
-void QRule::about()
+void QRuler::about()
 {
     AboutDialog about(this);
     about.exec();
