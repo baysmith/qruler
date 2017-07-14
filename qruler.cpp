@@ -119,6 +119,7 @@ void QRuler::createActions()
     connect(aboutAct, QAction::triggered, this, QRuler::about);
 
     hideAct = new QAction(tr("Hide"), this);
+    hideAct->setShortcut(tr("Space"));
     connect(hideAct, QAction::triggered, this, QRuler::showHideRule);
 
     auto exitAct = new QAction(tr("Exit"), this);
@@ -449,6 +450,10 @@ void QRuler::keyPressEvent(QKeyEvent *event)
 
     case Qt::Key_H:
         horisontalRule();
+        break;
+
+    case Qt::Key_Space:
+        showHideRule();
         break;
 
     case Qt::Key_C:
